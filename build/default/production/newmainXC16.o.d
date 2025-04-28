@@ -1,3 +1,6 @@
-build/default/production/newmainXC16.o: newmainXC16.c pwm.h
+build/default/production/newmainXC16.o: newmainXC16.c motor_control.h \
+ timer.h
 
-pwm.h:
+motor_control.h:
+
+timer.h:
