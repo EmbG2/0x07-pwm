@@ -15,7 +15,7 @@ int main(void) {
     setup_button();
 
     uint8_t prev_button = 1;
-    uint8_t start_sequence = 0;
+    uint8_t start_sequence = 1;
 
     while (1) {
         uint8_t current_button = BUTTON_E8;
