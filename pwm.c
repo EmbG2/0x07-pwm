@@ -7,34 +7,37 @@
 
 #include "pwm.h"
 
-void pwm_init(uint8_t oc_module) {
+void pwm_init(uint8_t oc_module, uint16_t period, uint16_t duty) {
     switch (oc_module) {
         case 1:
-            OC1CON1bits.OCM = 0b000;    // Disable Output Compare module
-            OC1CON1bits.OCTSEL = 0b111; // Peripheral clock source (internal clock)
-            OC1CON2bits.SYNCSEL = 0x1F; // No sync (OCxRS acts as period)
-            OC1CON1bits.OCM = 0b110;    // Edge-aligned PWM mode
+            OC1CON1 = 0; OC1CON2 = 0;
+            OC1R = duty;
+            OC1RS = period;
+            OC1CON1bits.OCTSEL = 0x07;
+            OC1CON2bits.SYNCSEL = 0x1F;
             break;
         case 2:
-            OC2CON1bits.OCM = 0b000;
-            OC2CON1bits.OCTSEL = 0b111;
+            OC2CON1 = 0; OC2CON2 = 0;
+            OC2R = duty;
+            OC2RS = period;
+            OC2CON1bits.OCTSEL = 0x07;
             OC2CON2bits.SYNCSEL = 0x1F;
-            OC2CON1bits.OCM = 0b110;
             break;
         case 3:
-            OC3CON1bits.OCM = 0b000;
-            OC3CON1bits.OCTSEL = 0b111;
+            OC3CON1 = 0; OC3CON2 = 0;
+            OC3R = duty;
+            OC3RS = period;
+            OC3CON1bits.OCTSEL = 0x07;
             OC3CON2bits.SYNCSEL = 0x1F;
-            OC3CON1bits.OCM = 0b110;
             break;
         case 4:
-            OC4CON1bits.OCM = 0b000;
-            OC4CON1bits.OCTSEL = 0b111;
+            OC4CON1 = 0; OC4CON2 = 0;
+            OC4R = duty;
+            OC4RS = period;
+            OC4CON1bits.OCTSEL = 0x07;
             OC4CON2bits.SYNCSEL = 0x1F;
-            OC4CON1bits.OCM = 0b110;
             break;
         default:
-            // Invalid OC module
             break;
     }
 }
@@ -61,7 +64,7 @@ void pwm_set_duty(uint8_t oc_module, uint16_t duty_cycle) {
 void pwm_start(uint8_t oc_module) {
     switch (oc_module) {
         case 1:
-            OC1CON1bits.OCM = 0b110; // Enable PWM mode on OC1
+            OC1CON1bits.OCM = 0b110;
             break;
         case 2:
             OC2CON1bits.OCM = 0b110;
@@ -80,7 +83,7 @@ void pwm_start(uint8_t oc_module) {
 void pwm_stop(uint8_t oc_module) {
     switch (oc_module) {
         case 1:
-            OC1CON1bits.OCM = 0b000; // Disable OC1
+            OC1CON1bits.OCM = 0b000;
             break;
         case 2:
             OC2CON1bits.OCM = 0b000;
@@ -95,4 +98,3 @@ void pwm_stop(uint8_t oc_module) {
             break;
     }
 }
-

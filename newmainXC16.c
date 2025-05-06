@@ -3,44 +3,39 @@
 #include "timer.h"
 
 #define FCY 72000000UL
+#include <libpic30.h>
 
-void setup_button(void) {
-    TRISEbits.TRISE8 = 1; // Set RE8 as input
+#define BUTTON_RE8 PORTEbits.RE8
+
+volatile uint8_t moving = 0;
+
+void setup_interrupt_button(void) {
+    TRISEbits.TRISE8 = 1;            // Set RE8 as input
+    RPINR0bits.INT1R = 88;           // Map INT1 to RPI88 (RE8)
+    INTCON2bits.INT1EP = 1;          // Falling edge triggers interrupt
+    IFS1bits.INT1IF = 0;             // Clear interrupt flag
+    IEC1bits.INT1IE = 1;             // Enable INT1 interrupt
 }
 
-#define BUTTON_E8 PORTEbits.RE8
-
 int main(void) {
+    ANSELA = ANSELB = ANSELC = ANSELD = ANSELE = ANSELG = 0x0000;
+
     motor_setup();
-    setup_button();
+    setup_interrupt_button();
 
-    uint8_t prev_button = 1;
-    uint8_t start_sequence = 1;
+    while (1) {}
 
-    while (1) {
-        uint8_t current_button = BUTTON_E8;
+    return 0;
+}
 
-        // Detect falling edge: button press
-        if (prev_button == 1 && current_button == 0) {
-            start_sequence = 1;
-            tmr_wait_ms(TIMER2, 200); // de-bouncing
-        }
+void __attribute__((__interrupt__, auto_psv)) _INT1Interrupt(void) {
+    IFS1bits.INT1IF = 0;             // Clear INT1 interrupt flag
 
-        if (start_sequence) {
-            move_forward(50); // Move forward at 50% speed
-            tmr_wait_ms(TIMER1, 3000); // Move forward for 3 seconds
-
-            stop_motors();
-            tmr_wait_ms(TIMER1, 1000); // Pause 1 second
-
-            move_backward(50); // Move backward at 50% speed
-            tmr_wait_ms(TIMER1, 3000); // Move backward for 3 seconds
-
-            stop_motors();
-
-            start_sequence = 0; // Sequence done
-        }
-
-        prev_button = current_button;
+    if (!moving) {
+        move_forward(70);           // Start motors
+        moving = 1;
+    } else {
+        stop_motors();              // Stop motors
+        moving = 0;
     }
 }
